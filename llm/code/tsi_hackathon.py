@@ -6,6 +6,7 @@ import openai
 from data_preperation import DataProcessor
 from openai_apicall import OpenAIApiCall
 from azure_openai_apicall import AzureOpenAIApiCall
+from azure_openai_apicall_chat import AzureOpenAIApiCall_Chat
 
 # define the files
 data_file = 'llm/files/eventsdata_sample_text_5k.json'
@@ -21,7 +22,8 @@ prepped_items = data_processor.prep_items()
 
 # create a single instance of the ApiCall class
 #api_call = OpenAIApiCall()
-api_call = AzureOpenAIApiCall()
+#api_call = AzureOpenAIApiCall()
+api_call = AzureOpenAIApiCall_Chat()
 
 # print the results
 print("Matching items:")

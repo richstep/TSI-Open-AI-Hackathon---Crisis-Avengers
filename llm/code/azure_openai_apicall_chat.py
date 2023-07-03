@@ -1,4 +1,4 @@
-# code/azure_openai_apicall.py
+# code/azure_openai_apicall_chat.py
 
 import json
 import os
@@ -13,10 +13,10 @@ load_dotenv()
 
 
 
-class AzureOpenAIApiCall:
+class AzureOpenAIApiCall_Chat:
     def __init__(self, temperature=0):
         self.temperature = temperature
-        self.deployment_name = os.getenv("DEPLOYMENT_NAME", "")
+        self.deployment_name = os.getenv("DEPLOYMENT_NAME_CHAT", "")
         openai.api_type = os.getenv("API_TYPE", "")
         openai.api_base = os.getenv("API_BASE", "")
         openai.api_version = os.getenv("API_VERSION", "")
@@ -36,7 +36,7 @@ class AzureOpenAIApiCall:
 def call_openai(prompt, deployment_name):
     llm = AzureOpenAI(
         deployment_name=deployment_name,
-        model_name="text-davinci-003",
+        model_name="gpt-35-turbo",
         client=None)
 
     response = llm(prompt)
