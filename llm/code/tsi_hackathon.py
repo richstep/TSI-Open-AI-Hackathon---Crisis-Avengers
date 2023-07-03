@@ -40,18 +40,44 @@ with open(ids_to_skip_file, 'a') as skip_output_file, open(results_file, 'a') as
 
         try:
             # *** call API ****
-            openai_result = api_call.run("tell me a joke about a spiderman cartoon movie")
+            openai_result = api_call.run(text=item["Text"])
             #openai_result = api_call.run(text=item["Text"])
+            print(openai_result)
+            print(type(openai_result))
+            import json
 
-            # add the _c0 value to the openai_result     
-            json_result = {"_c0": item["_c0"], "json_result": openai_result}
-            print(json_result)
+            # Extract content from openai_result
+            json_string = openai_result.content
+
+            # Parse JSON string into a Python dictionary
+            data_dict = json.loads(json_string)
+
+            # Add new key-value pair
+            data_dict['_c0'] = item["_c0"]
+
+            # Convert dictionary back to JSON string with new entry
+            json_string_with_new_entry = json.dumps(data_dict)
+
+            # Now you can parse this new JSON string back into a dictionary and assign items to variables
+            new_data_dict = json.loads(json_string_with_new_entry)
+
+            # Assign each item to a variable
+            summary = new_data_dict['summary']
+            crisis_assessment = new_data_dict['crisis_assessment']
+            crisis_ranking = new_data_dict['crisis_ranking']
+            locations_affected = new_data_dict['locations_affected']
+            people_affected = new_data_dict['people_affected']
+
+            # to access nested items
+            specific_count = people_affected.get('specific_count', None)
+            by_location = people_affected.get('by_location', None)
+            estimate = people_affected.get('estimate', None)
 
             # write the _c0 value to the ids_to_skip_file if it's not a humanitarian crisis
-            if "Crisis_Yes_No" in json_result and json_result["Crisis_Yes_No"] == "No":
+            if crisis_ranking < 2:
                 skip_output_file.write(str(item["_c0"]) + '\n')
 
-            result_output_file.write(json.dumps(json_result) + '\n')
+            result_output_file.write(json.dumps(new_data_dict) + '\n')
                 
         # write the openai_result to the result_file
         except openai.OpenAIError as e:
