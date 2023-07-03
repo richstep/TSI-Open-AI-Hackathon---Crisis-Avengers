@@ -1,45 +1,47 @@
 # code/azure_openai_apicall.py
+# code/azure_openai_apicall.py
 import json
 import os
 import openai
 import backoff
 from langchain import PromptTemplate, LLMChain
 from langchain.llms import AzureOpenAI
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+
 
 class AzureOpenAIApiCall:
     def __init__(self, temperature=0):
         self.temperature = temperature
+        self.deployment_name = os.getenv("DEPLOYMENT_NAME", "")
+        openai.api_type = os.getenv("API_TYPE", "")
+        openai.api_base = os.getenv("API_BASE", "")
+        openai.api_version = os.getenv("API_VERSION", "")
+        os.environ["OPENAI_API_KEY"] = os.getenv("AZURE_OPENAI_API_KEY", "")
 
     def run(self, text):
-        myArticle = text
-        myJson = "{\"Crisis_Yes_No\": \"Yes\",\"Category\": \"\",\"Summary\": \"\",\"Why_A_Crisis\": \"\",\"Locations\": [],\"Number of People Affected\": \"\"}"
-        article = myArticle[:1500]
-        myArticle = article
-        xjson = myJson
-        prompt_text = "Evaluate if this is a humanitarian crisis from the following news article. If no, reply with no and do not summarize. If yes, provide a summary of the article in less than 100 words. If yes, state why it's a humanitarian crisis. If yes, create a 1 to 3 word category. Put your reponse in the following JSON structure: ### {xjson} ### ### news article: ### {article} ###"
-        prompt = prompt_text.format(xjson=myJson, article=myArticle)
+        prompt_text = text
+
+        response = call_openai(prompt_text, self.deployment_name)
+
+        #result = response.choices[0].text.strip()
+        #json_data = fix_json(result)
+
+        return response
 
 
-        response = call_openai(prompt)
-        
-        result = response["choices"][0]["text"]
-        json_data = fix_json(result)
-    
-        return json_data
+def call_openai(prompt, deployment_name):
+    llm = AzureOpenAI(
+        deployment_name=deployment_name,
+        model_name="text-davinci-003",
+        client=None)
 
-def backoff_hdlr(details):
-    print ("Backing off {wait:0.1f} seconds after {tries} tries "
-           "calling function {target} with args {args} and kwargs "
-           "{kwargs}".format(**details))
+    response = llm(prompt)
 
-#@backoff.on_exception(backoff.expo, openai.OpenAIError, max_time=1800, on_backoff=backoff_hdlr)
-def call_openai(prompt):
-    return openai.Completion.create(
-        engine="text-davinci-003",
-        temperature=0,
-        prompt=prompt,
-        max_tokens=2048
-    )
+    return response
 
 def fix_json(json_str):
     try:
