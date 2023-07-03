@@ -8,12 +8,15 @@ from openai_apicall import OpenAIApiCall
 from azure_openai_apicall import AzureOpenAIApiCall
 
 # define the files
-data_file = 'files/eventsdata_sample_text_5k.json'
-ids_to_skip_file = 'files/ids_to_skip.txt'
-results_file = 'files/results.json'
+data_file = 'llm/files/eventsdata_sample_text_5k.json'
+ids_to_skip_file = 'llm/files/ids_to_skip.txt'
+results_file = 'llm/files/results.json'
+
+# define the keywords
+keywords = {'mississippi', 'hawaii50'}
 
 # create a data processor instance and prepare the items
-data_processor = DataProcessor(data_file, keywords, ids_to_skip_file)
+data_processor = DataProcessor(data_file, ids_to_skip_file)
 prepped_items = data_processor.prep_items()
 
 # create a single instance of the ApiCall class
@@ -23,7 +26,7 @@ api_call = AzureOpenAIApiCall()
 # print the results
 print("Matching items:")
 for item in prepped_items:
-    print(f"- {item['_c0']}: {item['keyword']} ({item['Text'][:25]})")
+    print(f"- {item['_c0']}:  ({item['Text'][:25]})")
 
 with open(ids_to_skip_file, 'a') as skip_output_file, open(results_file, 'a') as result_output_file:
     ii = 0
@@ -35,7 +38,8 @@ with open(ids_to_skip_file, 'a') as skip_output_file, open(results_file, 'a') as
 
         try:
             # *** call API ****
-            openai_result = api_call.run(text=item["Text"])
+            openai_result = api_call.run("tell me a joke about a spiderman cartoon movie")
+            #openai_result = api_call.run(text=item["Text"])
 
             # add the _c0 value to the openai_result     
             json_result = {"_c0": item["_c0"], "json_result": openai_result}
