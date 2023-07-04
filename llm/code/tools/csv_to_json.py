@@ -17,11 +17,18 @@ def make_json(csvFilePath, jsonFilePath):
 
         # Convert each row into a dictionary
         # and add it to data
+        skipped_rows = 0
+        read_rows = 0
         for row in csvReader:
-
-            # Assuming a column named '_c0' to
+            read_rows += 1
+            # Assuming a column named 'ID' to
             # be the primary key
-            key = row['_c0']
+            key = row['ID']
+
+            # Check if the key is an integer
+            if not key.isdigit():
+                skipped_rows += 1
+                continue
 
             if row["V2Themes"] is not None:
                 row["V2Themes"] = [theme.strip() for theme in row["V2Themes"].split(";")]
@@ -48,7 +55,8 @@ def make_json(csvFilePath, jsonFilePath):
 
             data[key] = row
 
-
+        print(f"Red {read_rows} rows")
+        print(f"Skipped {skipped_rows} rows")
  
     # Open a json writer, and use the json.dumps()
     # function to dump data
@@ -60,8 +68,8 @@ print(f"Working directory: {os.getcwd()}")
  
 # Decide the two file paths according to your
 # computer system
-csvFilePath = r'llm/files/eventsdata_sample_text_5k.csv'
-jsonFilePath = r'llm/files/eventsdata_sample_text_5k.json'
- 
+csvFilePath = r'llm/files/eventsdata_sample_text_5k_juneorjuly.csv'
+jsonFilePath = r'llm/files/eventsdata_sample_text_5k_juneorjuly.json'
+
 # Call the make_json function
 make_json(csvFilePath, jsonFilePath)
